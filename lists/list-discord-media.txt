@@ -1,0 +1,4 @@
+discord.media
+*.discord.media
+finland*.discord.media
+russia*.discord.media
