@@ -51,8 +51,14 @@ var RegionOrder = []string{
 
 type EventEmitter func(name string, data ...interface{})
 
-func Run(baseDir string, logger engine.LogFunc, emitter EventEmitter, fullTournament bool, discordToken string, guildID string) {
+func Run(baseDir string, logger engine.LogFunc, emitter EventEmitter, fullTournament bool, discordToken string, guildID string, discordChannel string) {
 	AppBaseDir = baseDir
+	
+	testChannel := discordChannel
+	if testChannel == "" {
+		testChannel = RotterdamID
+	}
+
 	session := SessionData{
 		Regions:   make(map[string]RegionResult),
 		Steps:     make(map[int]string),
@@ -113,11 +119,11 @@ func Run(baseDir string, logger engine.LogFunc, emitter EventEmitter, fullTourna
 
 		if pipe.TryConfig(extraArgs) {
 			time.Sleep(2 * time.Second)
-			emitter("log", "[WEBRTC] Verifying region: Rotterdam...\n")
-			ok, ms := checkSingleRegion(RotterdamID, discordToken, guildID, emitter)
+			emitter("log", fmt.Sprintf("[WEBRTC] Verifying region on channel %s...\n", testChannel))
+			ok, ms := checkSingleRegion(testChannel, discordToken, guildID, emitter)
 			res := RegionResult{Status: ifThen(ok, "OK", "XX"), MS: ms}
-			session.Regions["Rotterdam"] = res
-			emitter("region-check-end", map[string]interface{}{"name": "Rotterdam", "status": res.Status, "ms": res.MS})
+			session.Regions["Primary"] = res
+			emitter("region-check-end", map[string]interface{}{"name": "Primary", "status": res.Status, "ms": res.MS})
 
 			if ok {
 				emitter("log", fmt.Sprintf("[WEBRTC] Success! Latency: %dms\n", ms))
@@ -135,19 +141,20 @@ func Run(baseDir string, logger engine.LogFunc, emitter EventEmitter, fullTourna
 
 			if fullTournament {
 				for _, rID := range RegionOrder {
-					if rID == RotterdamID {
+					if rID == testChannel {
 						continue
 					}
 					name := RegionNames[rID]
+					if name == "" { name = rID }
 					emitter("log", fmt.Sprintf("[WEBRTC] Verifying region: %s...\n", name))
 					rOk, rMs := checkSingleRegion(rID, discordToken, guildID, emitter)
 					rRes := RegionResult{Status: ifThen(rOk, "OK", "XX"), MS: rMs}
-				session.Regions[name] = rRes
-				emitter("region-check-end", map[string]interface{}{"name": name, "status": rRes.Status, "ms": rMs})
-				if rOk {
-					emitter("log", fmt.Sprintf("[WEBRTC] %s OK (%dms)\n", name, rMs))
-					score += 2
-				}
+					session.Regions[name] = rRes
+					emitter("region-check-end", map[string]interface{}{"name": name, "status": rRes.Status, "ms": rMs})
+					if rOk {
+						emitter("log", fmt.Sprintf("[WEBRTC] %s OK (%dms)\n", name, rMs))
+						score += 2
+					}
 				}
 			}
 
@@ -157,7 +164,6 @@ func Run(baseDir string, logger engine.LogFunc, emitter EventEmitter, fullTourna
 			}
 		}
 	}
-
 	if bestArgs != nil {
 		pipe.AccumulatedArgs = append(pipe.AccumulatedArgs, bestArgs...)
 		pipe.TryConfig(bestArgs)

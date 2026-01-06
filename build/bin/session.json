@@ -1,0 +1,21 @@
+{
+  "config": "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 --filter-tcp=443 --hostlist=C:\\Users\\Cook1e\\AppData\\Local\\Temp\\liberty_gui_2125736057\\lists\\list-cloudflare.txt --dpi-desync=split2 --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=1 --new --filter-tcp=443 --hostlist=C:\\Users\\Cook1e\\AppData\\Local\\Temp\\liberty_gui_2125736057\\lists\\list-google.txt --ip-id=zero --dpi-desync=fake,fakedsplit --dpi-desync-repeats=6 --dpi-desync-fooling=ts --dpi-desync-fakedsplit-pattern=0x00 --dpi-desync-fake-tls=C:\\Users\\Cook1e\\AppData\\Local\\Temp\\liberty_gui_2125736057\\bin\\tls_clienthello_www_google_com.bin --new --filter-udp=443 --hostlist=C:\\Users\\Cook1e\\AppData\\Local\\Temp\\liberty_gui_2125736057\\lists\\list-google.txt --dpi-desync=fake --dpi-desync-repeats=6 --dpi-desync-fake-quic=C:\\Users\\Cook1e\\AppData\\Local\\Temp\\liberty_gui_2125736057\\bin\\quic_initial_www_google_com.bin --new --filter-tcp=443 --hostlist=C:\\Users\\Cook1e\\AppData\\Local\\Temp\\liberty_gui_2125736057\\lists\\list-discord.txt --dpi-desync=fake,fakedsplit --dpi-desync-repeats=6 --dpi-desync-fooling=ts --dpi-desync-fakedsplit-pattern=0x00 --dpi-desync-fake-tls=C:\\Users\\Cook1e\\AppData\\Local\\Temp\\liberty_gui_2125736057\\bin\\tls_clienthello_www_google_com.bin --new --filter-udp=50000-65535,19294-19344 --filter-l7=discord,stun --dpi-desync=fake --dpi-desync-repeats=6 --dpi-desync-fake-discord=C:\\Users\\Cook1e\\AppData\\Local\\Temp\\liberty_gui_2125736057\\bin\\quic_initial_www_google_com.bin --dpi-desync-fake-stun=C:\\Users\\Cook1e\\AppData\\Local\\Temp\\liberty_gui_2125736057\\bin\\quic_initial_www_google_com.bin --new --filter-tcp=443,2053,2083,2087,2096,8443 --hostlist=C:\\Users\\Cook1e\\AppData\\Local\\Temp\\liberty_gui_2125736057\\lists\\list-discord-media.txt --dpi-desync=fake,fakedsplit --dpi-desync-repeats=10 --dpi-desync-fooling=ts --dpi-desync-fakedsplit-pattern=0x00 --dpi-desync-fake-tls=C:\\Users\\Cook1e\\AppData\\Local\\Temp\\liberty_gui_2125736057\\bin\\tls_clienthello_www_google_com.bin --new",
+  "regions": {
+    "Rotterdam": {
+      "status": "OK",
+      "ms": 3734
+    }
+  },
+  "steps": {
+    "1": "Optimized",
+    "2": "Optimized",
+    "3": "Optimized",
+    "4": "Applied",
+    "5": "Optimized"
+  },
+  "start_time": 1767661110,
+  "dpi_level": "HIGH",
+  "rate": 100,
+  "latency": 175,
+  "entropy": 0.95
+}

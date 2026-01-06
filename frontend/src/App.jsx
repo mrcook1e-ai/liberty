@@ -6,7 +6,7 @@ import {
     RotateCcw, Activity, Sparkles, Terminal,
     Languages, Power, ChevronRight,
     X, Minus, Square, Copy, Zap, Globe, Info, Cpu,
-    MapPin, Clock, Trash2, Bell, Monitor, Network, ScrollText, FolderOpen, Key, Folder
+    MapPin, Clock, Trash2, Bell, Monitor, Network, ScrollText, FolderOpen, Key, Folder, Hash
 } from 'lucide-react';
 import { WindowMinimise, Quit } from '../wailsjs/runtime/runtime';
 
@@ -31,7 +31,7 @@ const i18n = {
         dns: "Secure DNS", dns_desc: "Cloudflare DoH",
         logs: "Core Logs", general: "General", network: "Network",
         open_data: "App Data Folder", open_desc: "Clean temporary files",
-        discord_token: "Bot Token", discord_guild: "Server ID",
+        discord_token: "Bot Token", discord_guild: "Server ID", discord_channel: "Voice Channel ID",
         work_dir: "Work Directory", select: "Select",
         secrets: "Secrets", paths: "Paths"
     },
@@ -55,7 +55,7 @@ const i18n = {
         dns: "Безопасный DNS", dns_desc: "DNS через HTTPS",
         logs: "Журнал ядра", general: "Основные", network: "Сеть",
         open_data: "Папка AppData", open_desc: "Удалить временный мусор",
-        discord_token: "Токен бота", discord_guild: "ID Сервера",
+        discord_token: "Токен бота", discord_guild: "ID Сервера", discord_channel: "ID Голосового канала",
         work_dir: "Рабочая папка", select: "Выбрать",
         secrets: "Секреты", paths: "Пути"
     }
@@ -89,9 +89,10 @@ function App() {
     const [minToTray, setMinTray] = useState(true);
     const [secureDns, setSecureDns] = useState(false);
 
-    // Новые настройки
+    // Настройки
     const [discordToken, setDiscordToken] = useState('');
     const [discordGuild, setDiscordGuild] = useState('');
+    const [discordChannel, setDiscordChannel] = useState('');
     const [workDir, setWorkDir] = useState('');
 
     const startTimeRef = useRef(null);
@@ -172,6 +173,7 @@ function App() {
             if (settings) {
                 setDiscordToken(settings.discord_token || '');
                 setDiscordGuild(settings.discord_guild || '');
+                setDiscordChannel(settings.discord_channel || '');
                 setWorkDir(settings.work_dir || '');
             }
 
@@ -207,10 +209,11 @@ function App() {
         return () => events.EventsOff("step-progress", "done");
     }, [loadSession]);
 
-    const saveAppSettings = async (token, guild, dir) => {
+    const saveAppSettings = async (token, guild, channel, dir) => {
         await callGo('SaveSettings', {
             discord_token: token,
             discord_guild: guild,
+            discord_channel: channel,
             work_dir: dir
         });
     };
@@ -235,7 +238,7 @@ function App() {
         const path = await callGo('SelectFolder');
         if (path) {
             setWorkDir(path);
-            saveAppSettings(discordToken, discordGuild, path);
+            saveAppSettings(discordToken, discordGuild, discordChannel, path);
         }
     };
 
@@ -355,42 +358,54 @@ function App() {
                 <AnimatePresence>
                     {showSettings && (
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[999] bg-[#0b0d11] p-8 flex flex-col">
-                            <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3"><Settings size={18} className="text-indigo-500" /><h2 className="text-[11px] font-black text-white uppercase tracking-[0.2em]">{t.settings}</h2></div>
                                 <button onClick={() => setShowSettings(false)} className="text-slate-400 hover:text-white p-2 bg-white/5 rounded-full transition-colors"><X size={18} /></button>
                             </div>
 
-                            <div className="space-y-8 overflow-y-auto custom-scroll pr-2">
-                                <div className="space-y-6">
+                            <div className="space-y-6 overflow-y-auto custom-scroll pr-2 pb-4">
+                                <div className="space-y-4">
                                     <div className="flex items-center gap-2 text-slate-500 text-[9px] font-bold uppercase tracking-widest"><Key size={12}/> {t.secrets}</div>
-                                    <div className="flex flex-col gap-4 pl-2">
-                                        <div className="flex flex-col gap-2">
+                                    <div className="flex flex-col gap-3 pl-2">
+                                        <div className="flex flex-col gap-1.5">
                                             <label className="text-[8px] font-black text-slate-700 uppercase tracking-widest">{t.discord_token}</label>
                                             <input 
                                                 type="password" 
                                                 value={discordToken} 
-                                                onChange={(e) => { setDiscordToken(e.target.value); saveAppSettings(e.target.value, discordGuild, workDir); }}
+                                                onChange={(e) => { setDiscordToken(e.target.value); saveAppSettings(e.target.value, discordGuild, discordChannel, workDir); }}
                                                 className="bg-black/20 border border-white/5 rounded px-3 py-2 text-[10px] text-indigo-400 focus:border-indigo-500/50 outline-none transition-all"
                                                 placeholder="MTM3..."
                                             />
                                         </div>
-                                        <div className="flex flex-col gap-2">
-                                            <label className="text-[8px] font-black text-slate-700 uppercase tracking-widest">{t.discord_guild}</label>
-                                            <input 
-                                                type="text" 
-                                                value={discordGuild} 
-                                                onChange={(e) => { setDiscordGuild(e.target.value); saveAppSettings(discordToken, e.target.value, workDir); }}
-                                                className="bg-black/20 border border-white/5 rounded px-3 py-2 text-[10px] text-indigo-400 focus:border-indigo-500/50 outline-none transition-all"
-                                                placeholder="9022..."
-                                            />
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="flex flex-col gap-1.5">
+                                                <label className="text-[8px] font-black text-slate-700 uppercase tracking-widest">{t.discord_guild}</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={discordGuild} 
+                                                    onChange={(e) => { setDiscordGuild(e.target.value); saveAppSettings(discordToken, e.target.value, discordChannel, workDir); }}
+                                                    className="bg-black/20 border border-white/5 rounded px-3 py-2 text-[10px] text-indigo-400 focus:border-indigo-500/50 outline-none transition-all"
+                                                    placeholder="Server ID"
+                                                />
+                                            </div>
+                                            <div className="flex flex-col gap-1.5">
+                                                <label className="text-[8px] font-black text-slate-700 uppercase tracking-widest">{t.discord_channel}</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={discordChannel} 
+                                                    onChange={(e) => { setDiscordChannel(e.target.value); saveAppSettings(discordToken, discordGuild, e.target.value, workDir); }}
+                                                    className="bg-black/20 border border-white/5 rounded px-3 py-2 text-[10px] text-indigo-400 focus:border-indigo-500/50 outline-none transition-all"
+                                                    placeholder="Channel ID"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="space-y-6">
+                                <div className="space-y-4">
                                     <div className="flex items-center gap-2 text-slate-500 text-[9px] font-bold uppercase tracking-widest"><Folder size={12}/> {t.paths}</div>
                                     <div className="pl-2">
-                                        <div className="flex flex-col gap-2">
+                                        <div className="flex flex-col gap-1.5">
                                             <label className="text-[8px] font-black text-slate-700 uppercase tracking-widest">{t.work_dir}</label>
                                             <div className="flex gap-2">
                                                 <input 
@@ -405,29 +420,28 @@ function App() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-6">
+                                <div className="space-y-4 pt-2">
                                     <div className="flex items-center gap-2 text-slate-600 text-[8px] font-black uppercase tracking-widest"><Network size={12}/> {t.network}</div>
-                                    <div className="flex flex-col gap-6 pl-2">
+                                    <div className="flex flex-col gap-4 pl-2">
                                         <SettingItem icon={Zap} title={t.finland_fix} desc={t.finland_desc} active={finlandFix} onClick={toggleFinlandFix} />
                                         <SettingItem icon={Globe} title={t.dns} desc={t.dns_desc} active={secureDns} onClick={() => toggleSetting('secureDns', setSecureDns, secureDns)} />
                                         <SettingItem icon={FolderOpen} title={t.open_data} desc={t.open_desc} active={false} onClick={() => callGo('OpenAppData')} />
                                     </div>
                                 </div>
 
-                                <div className="space-y-6 pt-4 border-t border-white/5">
-                                    <div className="flex items-center gap-6">
+                                <div className="space-y-4 pt-4 border-t border-white/5">
+                                    <div className="flex items-center justify-between">
                                         <div className="flex gap-4">
                                             {['ru', 'en'].map(l => (
                                                 <button key={l} onClick={() => setLang(l)} className={`text-[10px] font-black uppercase transition-all ${lang === l ? 'text-indigo-400' : 'text-slate-600 hover:text-slate-400'}`}>{l}</button>
                                             ))}
                                         </div>
-                                        <div className="w-[1px] h-4 bg-white/5" />
                                         <button onClick={reset} className="text-[10px] font-black text-red-500/60 hover:text-red-500 transition-all uppercase tracking-widest">{t.clear_data}</button>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="mt-auto pt-8 flex flex-col items-center gap-2 opacity-20">
+                            <div className="mt-auto pt-4 flex flex-col items-center gap-2 opacity-20">
                                 <Shield size={24} />
                                 <span className="text-[8px] font-mono tracking-[0.2em]">Build 26.0.4-LPR</span>
                             </div>

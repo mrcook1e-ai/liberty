@@ -108,9 +108,10 @@ func (a *App) OpenAppData() {
 }
 
 type AppSettings struct {
-	DiscordToken string `json:"discord_token"`
-	DiscordGuild string `json:"discord_guild"`
-	WorkDir      string `json:"work_dir"`
+	DiscordToken   string `json:"discord_token"`
+	DiscordGuild   string `json:"discord_guild"`
+	DiscordChannel string `json:"discord_channel"`
+	WorkDir        string `json:"work_dir"`
 }
 
 func (a *App) getSettingsPath() string {
@@ -168,7 +169,7 @@ func (a *App) Start(fullTournament bool) {
 		guiLogger := func(msg string) { runtime.EventsEmit(a.ctx, "log", msg) }
 		app.Run(workDir, guiLogger, func(name string, data ...interface{}) {
 			runtime.EventsEmit(a.ctx, name, data...)
-		}, fullTournament, settings.DiscordToken, settings.DiscordGuild)
+		}, fullTournament, settings.DiscordToken, settings.DiscordGuild, settings.DiscordChannel)
 	}()
 }
 
