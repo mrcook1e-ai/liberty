@@ -183,7 +183,7 @@ func Run(baseDir string, logger engine.LogFunc, emitter EventEmitter, fullTourna
 }
 
 func cleanupDiscord(baseDir string, token, guildID string) {
-	botExe := filepath.Join(baseDir, "bin", "botcheck.exe")
+	botExe := filepath.Join(baseDir, "botcheck.exe")
 	cmd := exec.Command(botExe, "-mode=leave", "-token="+token, "-guild="+guildID)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	cmd.Run()
@@ -195,7 +195,7 @@ func saveSession(baseDir string, s SessionData) {
 }
 
 func checkSingleRegion(cID string, token, guildID string, emitter EventEmitter) (bool, int64) {
-	botExe := filepath.Join(AppBaseDir, "bin", "botcheck.exe")
+	botExe := filepath.Join(AppBaseDir, "botcheck.exe")
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -229,7 +229,7 @@ func ifThen(cond bool, a, b string) string {
 }
 
 func CheckDiscordWebAndCDN(token string) (bool, string) {
-	botExe := filepath.Join(AppBaseDir, "bin", "botcheck.exe")
+	botExe := filepath.Join(AppBaseDir, "botcheck.exe")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, botExe, "-mode=gateway", "-token="+token)
@@ -239,7 +239,7 @@ func CheckDiscordWebAndCDN(token string) (bool, string) {
 }
 
 func SaveBatchFile(baseDir string, args []string) {
-	content := "@echo off\r\nset BIN=%~dp0bin/\n"
+	content := "@echo off\r\nset BIN=%~dp0\n"
 	content += fmt.Sprintf("start \"Zapret\" /min \"%%BIN%%winws.exe\" %s\r\n", strings.Join(args, " "))
 	_ = os.WriteFile(filepath.Join(baseDir, "final_start.bat"), []byte(content), 0755)
 }

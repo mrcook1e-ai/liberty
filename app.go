@@ -151,15 +151,20 @@ func (a *App) SelectFolder() string {
 	return res
 }
 
+func (a *App) getWorkDir() string {
+	settings := a.GetSettings()
+	if settings.WorkDir != "" {
+		return settings.WorkDir
+	}
+	home, _ := os.UserHomeDir()
+	return filepath.Join(home, "AppData", "Roaming", "liberty")
+}
+
 func (a *App) Start(fullTournament bool) {
 	settings := a.GetSettings()
 	go func() {
-		workDir := settings.WorkDir
-		if workDir == "" {
-			workDir, _ = os.MkdirTemp("", "liberty_gui_")
-		} else {
-			os.MkdirAll(workDir, 0755)
-		}
+		workDir := a.getWorkDir()
+		os.MkdirAll(workDir, 0755)
 
 		if err := unpack(workDir); err != nil {
 			runtime.EventsEmit(a.ctx, "log", "[ERR] Unpack failed: "+err.Error())
@@ -175,11 +180,7 @@ func (a *App) Start(fullTournament bool) {
 
 // GetSessionData возвращает всю сохраненную информацию
 func (a *App) GetSessionData() string {
-	settings := a.GetSettings()
-	workDir := settings.WorkDir
-	if workDir == "" {
-		return ""
-	}
+	workDir := a.getWorkDir()
 	data, err := os.ReadFile(filepath.Join(workDir, "session.json"))
 	if err != nil {
 		return ""
@@ -188,11 +189,10 @@ func (a *App) GetSessionData() string {
 }
 
 func (a *App) Reset() {
-	settings := a.GetSettings()
-	if settings.WorkDir != "" {
-		os.Remove(filepath.Join(settings.WorkDir, "session.json"))
-		os.Remove(filepath.Join(settings.WorkDir, "last_config.txt"))
-	}
+	workDir := a.getWorkDir()
+	os.Remove(filepath.Join(workDir, "session.json"))
+	os.Remove(filepath.Join(workDir, "last_config.txt"))
+
 	a.Stop()
 	runtime.EventsEmit(a.ctx, "log", "[SYSTEM] Engine reset.\n")
 }

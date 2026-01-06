@@ -33,7 +33,7 @@ type ServiceDefinition struct {
 }
 
 func NewPipeline(baseDir string, logger LogFunc, progress ProgressFunc) *PipelineState {
-	binDir := filepath.Join(baseDir, "bin")
+	binDir := baseDir
 	listsDir := filepath.Join(baseDir, "lists")
 	winws := filepath.Join(binDir, "winws.exe")
 

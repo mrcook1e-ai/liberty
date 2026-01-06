@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -45,10 +46,24 @@ func main() {
 func unpack(dest string) error {
 	return fs.WalkDir(binaryAssets, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil { return err }
-		if d.IsDir() {
-			return os.MkdirAll(filepath.Join(dest, path), 0755)
+		if path == "." { return nil }
+
+		// Определяем целевой путь
+		relPath := path
+		if path == "bin" { return nil } // Пропускаем саму папку bin
+		if strings.HasPrefix(path, "bin/") {
+			relPath = strings.TrimPrefix(path, "bin/")
 		}
-		data, _ := binaryAssets.ReadFile(path)
-		return os.WriteFile(filepath.Join(dest, path), data, 0755)
+
+		targetPath := filepath.Join(dest, relPath)
+
+		if d.IsDir() {
+			return os.MkdirAll(targetPath, 0755)
+		}
+
+		data, err := binaryAssets.ReadFile(path)
+		if err != nil { return err }
+
+		return os.WriteFile(targetPath, data, 0755)
 	})
 }
